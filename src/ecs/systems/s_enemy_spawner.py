@@ -8,7 +8,7 @@ from src.create.prefab_rectangle import create_enemy_rectangle
 from src.ecs.components.c_enemy_spawner import CEnemySpawner
 
 
-def system_enemy_spawner(world:esper.World,delta_time: float, enemy_types: Dict) -> None:
+def system_enemy_spawner(world:esper.World,delta_time: float, enemy_types: list[Dict]) -> None:
     components = world.get_component(CEnemySpawner)
 
     ent, spawner = components[0]

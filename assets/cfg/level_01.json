@@ -1,4 +1,10 @@
 {
+    "player_spawn":{
+        "position": {
+            "x": 100,
+            "y": 100
+        }
+    },
     "enemy_spawn_events": [
         {
             "time": 3.0,

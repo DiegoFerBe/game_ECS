@@ -33,3 +33,16 @@ def create_enemy_rectangle(world:esper.World,cfg_enemy:dict,position:pygame.Vect
                 position=position,
                 velocity=pygame.Vector2(velocity * math.cos(angle_rad), velocity * math.sin(angle_rad)),
             )
+    
+def create_player_rectangle(world:esper.World,cfg_player:dict,position:dict) -> None:
+    size = pygame.Vector2(cfg_player['size']['x'], cfg_player['size']['y'])
+    color = pygame.Color(cfg_player['color']['r'], cfg_player['color']['g'], cfg_player['color']['b'])
+    velocity = pygame.Vector2(0,0)
+    position = pygame.Vector2(position['position']['x'], position['position']['y'])
+    create_rectangle(
+                world=world,
+                size=size,
+                color=color,
+                position=position,
+                velocity=velocity,
+            )

@@ -1,12 +1,8 @@
-from typing import Dict, List
 import pygame
 import esper
 
-from src.create.prefab_rectangle import create_rectangle
-from src.ecs.components.c_enemy_spawner import CEnemySpawner
-from src.ecs.components.c_surface import CSurface
-from src.ecs.components.c_transform import CTransform
-from src.ecs.components.c_velocity import CVelocity
+from src.create.prefab_rectangle import create_player_rectangle
+from src.create.prefab_spawner import create_spawner
 from src.ecs.systems.s_debug import system_debug
 from src.ecs.systems.s_enemy_spawner import system_enemy_spawner
 from src.ecs.systems.s_movement import system_movement
@@ -29,6 +25,16 @@ class GameEngine:
         self.square_speed = pygame.Vector2(100, 100)
         self.world = esper.World()
 
+        self.level_config = load_json("assets/cfg/level_01.json")
+        self.enemies = load_json("assets/cfg/enemies.json")
+        self.window_config = load_json("assets/cfg/window.json")
+        self.player_config = load_json("assets/cfg/player.json")
+
+
+        self.fps = self.window_config["framerate"]
+        # Create the main screen
+        self.screen = pygame.display.set_mode((self.window_config["size"]["w"], self.window_config["size"]["h"]))
+        pygame.display.set_caption(self.window_config["title"])
 
         
 
@@ -44,23 +50,12 @@ class GameEngine:
         self._clean()
 
     def _create(self):
-        #create_rectangle(self.world,self.square_size, self.square_color, self.square_position, self.square_speed)
-
-        self.spawners = load_json("src/cfg/level_01.json","enemy_spawn_events")
-        self.enemies = load_json("src/cfg/enemies.json")
-        self.main_config = load_json("src/cfg/window.json")
-
-        self.fps = self.main_config["framerate"]
-
-
         #Enemy spawner
-        enemy_spawner = self.world.create_entity()
-        self.world.add_component(enemy_spawner, CEnemySpawner(self.spawners))
+        create_spawner(self.world, self.level_config["enemy_spawn_events"])
+        # Player
+        create_player_rectangle(self.world, self.player_config, self.level_config["player_spawn"])
 
-        # Create the main screen
-        self.screen = pygame.display.set_mode((self.main_config["size"]["w"], self.main_config["size"]["h"]))
-
-        pygame.display.set_caption(self.main_config["title"])
+        
 
 
     def _calculate_time(self):
@@ -78,7 +73,7 @@ class GameEngine:
         system_enemy_spawner(self.world,self.delta_time, self.enemies)
 
     def _draw(self):
-        self.screen.fill((self.main_config["bg_color"]["r"], self.main_config["bg_color"]["g"], self.main_config["bg_color"]["b"]))
+        self.screen.fill((self.window_config["bg_color"]["r"], self.window_config["bg_color"]["g"], self.window_config["bg_color"]["b"]))
         system_rendering(self.world,self.screen)
 
         # custom debug system
