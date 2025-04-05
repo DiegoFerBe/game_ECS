@@ -4,7 +4,7 @@ import esper
 import pygame
 import random
 
-from src.create.prefab_rectangle import create_rectangle
+from src.create.prefab_rectangle import create_enemy_rectangle
 from src.ecs.components.c_enemy_spawner import CEnemySpawner
 
 
@@ -21,23 +21,10 @@ def system_enemy_spawner(world:esper.World,delta_time: float, enemy_types: Dict)
         
         if spawner.timer >= time:
             type_data = enemy_types[enemy_type]
-            size = pygame.Vector2(type_data['size']['x'], type_data['size']['y'])
-            color = pygame.Color(type_data['color']['r'], type_data['color']['g'], type_data['color']['b'])
-
-            angle = random.uniform(0, 360)
-            angle_rad = math.radians(angle)
-            velocity_min = pygame.Vector2(100,100)
-            velocity_min:float = type_data['velocity_min']
-            velocity_max:float = type_data['velocity_max']
-
-            velocity = random.uniform(velocity_min, velocity_max)
-            
-            create_rectangle(
+            create_enemy_rectangle(
                 world=world,
-                size=size,
-                color=color,
-                position=position,
-                velocity=pygame.Vector2(velocity * math.cos(angle_rad), velocity * math.sin(angle_rad)),
+                cfg_enemy=type_data,
+                position=position
             )
             spawner.current_index += 1
         else:
