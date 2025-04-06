@@ -6,6 +6,7 @@ from src.create.prefab_rectangle import create_player_rectangle
 from src.create.prefab_spawner import create_spawner
 from src.ecs.components.c_input_command import CInputCommand, CommandPhase
 from src.ecs.components.c_velocity import CVelocity
+from src.ecs.systems.s_boundary_player import system_boundary_player
 from src.ecs.systems.s_collision_player_enemy import system_collision_player_enemy
 from src.ecs.systems.s_debug import system_debug
 from src.ecs.systems.s_enemy_spawner import system_enemy_spawner
@@ -80,9 +81,10 @@ class GameEngine:
 
     def _update(self):
         system_movement(self.world,self.delta_time)
-        system_screen_bounce(self.world,self.screen)
-        system_enemy_spawner(self.world,self.delta_time, self.enemies)
-        system_collision_player_enemy(self.world,self._player_entity, self.level_config)
+        #system_screen_bounce(self.world,self.screen)
+        system_boundary_player(self.world,self.screen)
+        #system_enemy_spawner(self.world,self.delta_time, self.enemies)
+        #system_collision_player_enemy(self.world,self._player_entity, self.level_config)
         self.world._clear_dead_entities()
 
     def _draw(self):
