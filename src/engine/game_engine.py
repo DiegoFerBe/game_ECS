@@ -1,10 +1,14 @@
 import pygame
 import esper
 
+from src.create.prefab_creator import create_input_player
 from src.create.prefab_rectangle import create_player_rectangle
 from src.create.prefab_spawner import create_spawner
+from src.ecs.components.c_input_command import CInputCommand
+from src.ecs.components.c_velocity import CVelocity
 from src.ecs.systems.s_debug import system_debug
 from src.ecs.systems.s_enemy_spawner import system_enemy_spawner
+from src.ecs.systems.s_input_player import system_input_player
 from src.ecs.systems.s_movement import system_movement
 from src.ecs.systems.s_rendering import system_rendering
 from src.ecs.systems.s_screen_bounce import system_screen_bounce
@@ -30,7 +34,7 @@ class GameEngine:
         self.window_config = load_json("assets/cfg/window.json")
         self.player_config = load_json("assets/cfg/player.json")
 
-
+        
         self.fps = self.window_config["framerate"]
         # Create the main screen
         self.screen = pygame.display.set_mode((self.window_config["size"]["w"], self.window_config["size"]["h"]))
@@ -50,10 +54,15 @@ class GameEngine:
         self._clean()
 
     def _create(self):
+        
         #Enemy spawner
         create_spawner(self.world, self.level_config["enemy_spawn_events"])
+
+        create_input_player(self.world)
+
         # Player
-        create_player_rectangle(self.world, self.player_config, self.level_config["player_spawn"])
+        self._player_entity = create_player_rectangle(self.world, self.player_config, self.level_config["player_spawn"])
+        self._player_c_velocity = self.world.component_for_entity(self._player_entity, CVelocity)
 
         
 
@@ -64,6 +73,7 @@ class GameEngine:
 
     def _process_events(self):
         for event in pygame.event.get():
+            system_input_player(self.world, event, self._do_action)
             if event.type == pygame.QUIT:
                 self.is_running = False
 
@@ -83,3 +93,6 @@ class GameEngine:
 
     def _clean(self):
         pygame.quit()
+
+    def _do_action(self, c_input: CInputCommand):
+        print(f"Action: {c_input.name} - Phase: {c_input.phase}")

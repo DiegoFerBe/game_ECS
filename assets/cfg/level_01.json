@@ -1,8 +1,8 @@
 {
     "player_spawn":{
         "position": {
-            "x": 100,
-            "y": 100
+            "x": 320,
+            "y": 180
         }
     },
     "enemy_spawn_events": [
