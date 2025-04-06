@@ -36,7 +36,7 @@ def create_enemy_rectangle(world:esper.World,cfg_enemy:dict,position:pygame.Vect
                 position=position,
                 velocity=pygame.Vector2(velocity * math.cos(angle_rad), velocity * math.sin(angle_rad)),
             )
-    world.add_component(enemy_entity,CTagEnemy)
+    world.add_component(enemy_entity,CTagEnemy())
     return enemy_entity
     
 def create_player_rectangle(world:esper.World,cfg_player:dict,position:dict) -> int:
@@ -52,5 +52,5 @@ def create_player_rectangle(world:esper.World,cfg_player:dict,position:dict) -> 
                 velocity=velocity,
             )
     
-    world.add_component(player_entity,CTagPlayer)
+    world.add_component(player_entity,CTagPlayer())
     return player_entity

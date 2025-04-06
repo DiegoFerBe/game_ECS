@@ -4,8 +4,9 @@ import esper
 from src.create.prefab_creator import create_input_player
 from src.create.prefab_rectangle import create_player_rectangle
 from src.create.prefab_spawner import create_spawner
-from src.ecs.components.c_input_command import CInputCommand
+from src.ecs.components.c_input_command import CInputCommand, CommandPhase
 from src.ecs.components.c_velocity import CVelocity
+from src.ecs.systems.s_collision_player_enemy import system_collision_player_enemy
 from src.ecs.systems.s_debug import system_debug
 from src.ecs.systems.s_enemy_spawner import system_enemy_spawner
 from src.ecs.systems.s_input_player import system_input_player
@@ -81,6 +82,8 @@ class GameEngine:
         system_movement(self.world,self.delta_time)
         system_screen_bounce(self.world,self.screen)
         system_enemy_spawner(self.world,self.delta_time, self.enemies)
+        system_collision_player_enemy(self.world,self._player_entity, self.level_config)
+        self.world._clear_dead_entities()
 
     def _draw(self):
         self.screen.fill((self.window_config["bg_color"]["r"], self.window_config["bg_color"]["g"], self.window_config["bg_color"]["b"]))
@@ -92,7 +95,31 @@ class GameEngine:
         pygame.display.flip()
 
     def _clean(self):
+        self.world.clear_database()
         pygame.quit()
 
     def _do_action(self, c_input: CInputCommand):
-        print(f"Action: {c_input.name} - Phase: {c_input.phase}")
+        if c_input.name == "PLAYER LEFT":
+            if c_input.phase == CommandPhase.START:
+                self._player_c_velocity.velocity.x -= self.player_config["input_velocity"]
+            elif c_input.phase == CommandPhase.END:
+                self._player_c_velocity.velocity.x += self.player_config["input_velocity"]
+
+        if c_input.name == "PLAYER RIGHT":
+            if c_input.phase == CommandPhase.START:
+                self._player_c_velocity.velocity.x += self.player_config["input_velocity"]
+            elif c_input.phase == CommandPhase.END:
+                self._player_c_velocity.velocity.x -= self.player_config["input_velocity"]
+        
+        if c_input.name == "PLAYER UP":
+            if c_input.phase == CommandPhase.START:
+                self._player_c_velocity.velocity.y -= self.player_config["input_velocity"]
+            elif c_input.phase == CommandPhase.END:
+                self._player_c_velocity.velocity.y += self.player_config["input_velocity"]
+
+        if c_input.name == "PLAYER DOWN":
+            if c_input.phase == CommandPhase.START:
+                self._player_c_velocity.velocity.y += self.player_config["input_velocity"]
+            elif c_input.phase == CommandPhase.END:
+                self._player_c_velocity.velocity.y -= self.player_config["input_velocity"]
+            
