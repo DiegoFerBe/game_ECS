@@ -1,12 +1,17 @@
+from typing import Optional
 import pygame
 import esper
 
 from src.create.prefab_creator import create_input_player
-from src.create.prefab_rectangle import create_player_rectangle
+from src.create.prefab_rectangle import create_bullet_rectangle, create_player_rectangle
 from src.create.prefab_spawner import create_spawner
 from src.ecs.components.c_input_command import CInputCommand, CommandPhase
+from src.ecs.components.c_surface import CSurface
+from src.ecs.components.c_transform import CTransform
 from src.ecs.components.c_velocity import CVelocity
 from src.ecs.systems.s_boundary_player import system_boundary_player
+from src.ecs.systems.s_bullet import system_bullet
+from src.ecs.systems.s_bullet_damage import system_bullet_damage_enemies
 from src.ecs.systems.s_collision_player_enemy import system_collision_player_enemy
 from src.ecs.systems.s_debug import system_debug
 from src.ecs.systems.s_enemy_spawner import system_enemy_spawner
@@ -35,11 +40,12 @@ class GameEngine:
         self.enemies = load_json("assets/cfg/enemies.json")
         self.window_config = load_json("assets/cfg/window.json")
         self.player_config = load_json("assets/cfg/player.json")
+        self.bullet_config = load_json("assets/cfg/bullet.json")
 
         
         self.fps = self.window_config["framerate"]
         # Create the main screen
-        self.screen = pygame.display.set_mode((self.window_config["size"]["w"], self.window_config["size"]["h"]))
+        self.screen = pygame.display.set_mode((self.window_config["size"]["w"], self.window_config["size"]["h"]),pygame.SCALED)
         pygame.display.set_caption(self.window_config["title"])
 
         
@@ -65,6 +71,7 @@ class GameEngine:
         # Player
         self._player_entity = create_player_rectangle(self.world, self.player_config, self.level_config["player_spawn"])
         self._player_c_velocity = self.world.component_for_entity(self._player_entity, CVelocity)
+        self._player_c_transform = self.world.component_for_entity(self._player_entity, CTransform)
 
         
 
@@ -81,10 +88,12 @@ class GameEngine:
 
     def _update(self):
         system_movement(self.world,self.delta_time)
-        #system_screen_bounce(self.world,self.screen)
+        system_screen_bounce(self.world,self.screen)
         system_boundary_player(self.world,self.screen)
-        #system_enemy_spawner(self.world,self.delta_time, self.enemies)
-        #system_collision_player_enemy(self.world,self._player_entity, self.level_config)
+        system_enemy_spawner(self.world,self.delta_time, self.enemies)
+        system_collision_player_enemy(self.world,self._player_entity, self.level_config)
+        system_bullet(self.world,self.screen, self.level_config["player_spawn"]["max_bullets"])
+        system_bullet_damage_enemies(self.world)
         self.world._clear_dead_entities()
 
     def _draw(self):
@@ -92,7 +101,7 @@ class GameEngine:
         system_rendering(self.world,self.screen)
 
         # custom debug system
-        system_debug(self.world,self.screen)
+        #system_debug(self.world,self.screen)
 
         pygame.display.flip()
 
@@ -100,7 +109,7 @@ class GameEngine:
         self.world.clear_database()
         pygame.quit()
 
-    def _do_action(self, c_input: CInputCommand):
+    def _do_action(self, c_input: CInputCommand,mouse_pos: pygame.Vector2 = pygame.Vector2(0,0)) -> None:
         if c_input.name == "PLAYER LEFT":
             if c_input.phase == CommandPhase.START:
                 self._player_c_velocity.velocity.x -= self.player_config["input_velocity"]
@@ -124,4 +133,14 @@ class GameEngine:
                 self._player_c_velocity.velocity.y += self.player_config["input_velocity"]
             elif c_input.phase == CommandPhase.END:
                 self._player_c_velocity.velocity.y -= self.player_config["input_velocity"]
+        
+        if c_input.name == "PLAYER FIRE":
+            if c_input.phase == CommandPhase.START:
+                player_surface = self.world.component_for_entity(self._player_entity, CSurface)
+                player_center = self._player_c_transform.position + pygame.Vector2(
+                    player_surface.surface.get_width() / 2,
+                    player_surface.surface.get_height() / 2
+                )
+                create_bullet_rectangle(self.world, self.bullet_config, position=player_center, positionScope=mouse_pos)
+            
             
