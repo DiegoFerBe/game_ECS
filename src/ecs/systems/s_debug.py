@@ -9,9 +9,7 @@ from src.ecs.components.c_velocity import CVelocity
 
 
 def system_debug(world:esper.World, screen:pygame.Surface) -> None:
-    """
-    Debug system to render debug information on the screen.
-    """
+
     components = world.get_components(CTransform,CSurface,CVelocity)  
 
     font = pygame.font.Font(None, 33)
@@ -24,9 +22,10 @@ def system_debug(world:esper.World, screen:pygame.Surface) -> None:
     c_t:CTransform
     c_s:CSurface
     for entity, (c_t, c_s,c_v) in components:
-        # Obtener rectángulo con la posición real
-        entity_rect = c_s.surface.get_rect(topleft=(c_t.position.x, c_t.position.y))
         
+        entity_rect = c_s.area.copy()
+        entity_rect.topleft = c_t.position
+
         # Dibujar rectángulo de colisión
         pygame.draw.rect(screen, (255, 0, 0), entity_rect, 1)
 

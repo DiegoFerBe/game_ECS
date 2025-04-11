@@ -9,6 +9,8 @@ from src.ecs.components.c_input_command import CInputCommand, CommandPhase
 from src.ecs.components.c_surface import CSurface
 from src.ecs.components.c_transform import CTransform
 from src.ecs.components.c_velocity import CVelocity
+from src.ecs.components.tags.c_tag_bullet import CTagBullet
+from src.ecs.systems.s_animation import system_animation
 from src.ecs.systems.s_boundary_player import system_boundary_player
 from src.ecs.systems.s_bullet import system_bullet
 from src.ecs.systems.s_bullet_damage import system_bullet_damage_enemies
@@ -94,6 +96,8 @@ class GameEngine:
         system_collision_player_enemy(self.world,self._player_entity, self.level_config)
         system_bullet(self.world,self.screen, self.level_config["player_spawn"]["max_bullets"])
         system_bullet_damage_enemies(self.world)
+
+        system_animation(self.world,self.delta_time)
         self.world._clear_dead_entities()
 
     def _draw(self):
@@ -101,7 +105,7 @@ class GameEngine:
         system_rendering(self.world,self.screen)
 
         # custom debug system
-        #system_debug(self.world,self.screen)
+        system_debug(self.world,self.screen)
 
         pygame.display.flip()
 

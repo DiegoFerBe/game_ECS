@@ -8,10 +8,6 @@ from src.ecs.components.tags.c_tag_enemy import CTagEnemy
 
 
 def system_bullet_damage_enemies(world: esper.World) -> None:
-    """
-    This system handles the damage to enemies from bullets.
-    It checks for collisions between bullets and enemies and applies damage accordingly.
-    """
     bullets = world.get_components(CSurface, CTransform, CTagBullet)
     enemies = world.get_components(CSurface, CTransform, CTagEnemy)
 
@@ -19,10 +15,12 @@ def system_bullet_damage_enemies(world: esper.World) -> None:
     to_delete_enemies = set()
 
     for bullet_entity, (c_b_surface, c_b_transform, _) in bullets:
-        bullet_rect = c_b_surface.surface.get_rect(topleft=c_b_transform.position)
+        bullet_rect = c_b_surface.area.copy()
+        bullet_rect.topleft = c_b_transform.position
 
         for enemy_entity, (c_e_surface, c_e_transform, _) in enemies:
-            enemy_rect = c_e_surface.surface.get_rect(topleft=c_e_transform.position)
+            enemy_rect = c_e_surface.area.copy()
+            enemy_rect.topleft = c_e_transform.position
 
             if bullet_rect.colliderect(enemy_rect):
                 to_delete_bullets.add(bullet_entity)

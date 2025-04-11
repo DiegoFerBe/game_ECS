@@ -3,6 +3,7 @@ import random
 import esper
 import pygame
 
+from src.ecs.components.c_animation import CAnimation
 from src.ecs.components.c_surface import CSurface
 from src.ecs.components.c_transform import CTransform
 from src.ecs.components.c_velocity import CVelocity
@@ -19,10 +20,20 @@ def create_rectangle(world:esper.World,size:pygame.Vector2,color:pygame.Color,po
     world.add_component(rectangle_entity,
                         CVelocity(velocity=velocity))
     return rectangle_entity
+
+def create_sprite(world:esper.World,position:pygame.Vector2,velocity:pygame.Vector2,texture:pygame.Surface) -> int:
+    sprite_entity = world.create_entity()
+    world.add_component(sprite_entity,
+                        CTransform(position=position))
+    world.add_component(sprite_entity,
+                        CVelocity(velocity=velocity))
+    world.add_component(sprite_entity,
+                        CSurface.from_surface(texture))
+    return sprite_entity
     
 def create_enemy_rectangle(world:esper.World,cfg_enemy:dict,position:pygame.Vector2) -> None:
-    size = pygame.Vector2(cfg_enemy['size']['x'], cfg_enemy['size']['y'])
-    color = pygame.Color(cfg_enemy['color']['r'], cfg_enemy['color']['g'], cfg_enemy['color']['b'])
+    
+    enemy_surface = pygame.image.load(cfg_enemy['image']).convert_alpha()
 
     angle = random.uniform(0, 360)
     angle_rad = math.radians(angle)
@@ -30,37 +41,38 @@ def create_enemy_rectangle(world:esper.World,cfg_enemy:dict,position:pygame.Vect
     velocity_min:float = cfg_enemy['velocity_min']
     velocity_max:float = cfg_enemy['velocity_max']
     velocity = random.uniform(velocity_min, velocity_max)
-    enemy_entity:int = create_rectangle(
+    enemy_entity:int = create_sprite(
                 world=world,
-                size=size,
-                color=color,
                 position=position,
                 velocity=pygame.Vector2(velocity * math.cos(angle_rad), velocity * math.sin(angle_rad)),
+                texture=enemy_surface,
             )
     world.add_component(enemy_entity,CTagEnemy())
     return enemy_entity
     
 def create_player_rectangle(world:esper.World,cfg_player:dict,position:dict) -> int:
-    size = pygame.Vector2(cfg_player['size']['x'], cfg_player['size']['y'])
-    color = pygame.Color(cfg_player['color']['r'], cfg_player['color']['g'], cfg_player['color']['b'])
+    
+    player_sprite = pygame.image.load(cfg_player['image']).convert_alpha()
+    size = player_sprite.get_rect()
+    size.width = size.width / cfg_player['animations']['number_frames']
     velocity = pygame.Vector2(0,0)
-    position = pygame.Vector2(position['position']['x'] - size.x / 2, position['position']['y'] - size.y / 2)
-    player_entity:int = create_rectangle(
+    position = pygame.Vector2(position['position']['x'] - size.width / 2, position['position']['y'] - size.height / 2)
+    player_entity:int = create_sprite(
                 world=world,
-                size=size,
-                color=color,
                 position=position,
                 velocity=velocity,
+                texture=player_sprite,
             )
+    
+    world.add_component(player_entity,
+                        CAnimation(cfg_player['animations']))
     
     world.add_component(player_entity,CTagPlayer())
     return player_entity
 
 def create_bullet_rectangle(world:esper.World,cfg_bullet:dict,position:pygame.Vector2,positionScope: pygame.Vector2) -> int:
-    size = pygame.Vector2(cfg_bullet['size']['x'], cfg_bullet['size']['y'])
-    color = pygame.Color(cfg_bullet['color']['r'],
-                         cfg_bullet['color']['g'],
-                         cfg_bullet['color']['b'])
+    
+    bullet_sprite = pygame.image.load(cfg_bullet['image']).convert_alpha()
 
     direction = (positionScope - position)
     if direction.length_squared() > 0:  # Evita división por 0
@@ -68,17 +80,15 @@ def create_bullet_rectangle(world:esper.World,cfg_bullet:dict,position:pygame.Ve
     else:
         direction = pygame.Vector2(1, 0)  # Dirección por defecto si son iguales
 
-    # Multiplicar dirección por velocidad
     speed = cfg_bullet["velocity"]
     velocity = direction * speed
 
     # Crear la bala
-    bullet_entity: int = create_rectangle(
+    bullet_entity: int = create_sprite(
         world=world,
-        size=size,
-        color=color,
         position=position,
         velocity=velocity,
+        texture=bullet_sprite,
     )
 
     world.add_component(bullet_entity, CTagBullet())

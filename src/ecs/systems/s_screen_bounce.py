@@ -14,7 +14,8 @@ def system_screen_bounce (world:esper.World,screen:pygame.surface):
     c_v:CVelocity
     c_s:CSurface
     for entity, (c_t,c_v,c_s,c_e) in components:
-        entity_sprite = c_s.surface.get_rect(topleft=c_t.position)
+        entity_sprite = c_s.area.copy()
+        entity_sprite.topleft = c_t.position
 
         if entity_sprite.left < 0 or entity_sprite.right > screen_rectangle.width:
             c_v.velocity.x *= -1

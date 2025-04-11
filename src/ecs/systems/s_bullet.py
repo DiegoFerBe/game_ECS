@@ -15,14 +15,17 @@ def system_bullet(world: esper.World,screen: pygame.Surface ,max_bullets_in_scre
     to_delete = set()
 
     for entity, (c_t, c_v, c_s, c_b) in components:
-        bullet_rect = c_s.surface.get_rect(topleft=c_t.position)
+        bullet_rect = c_s.area.copy()
+        bullet_rect.topleft = c_t.position
 
         if not screen.get_rect().colliderect(bullet_rect):
             to_delete.add(entity)
 
-    if len(components) > max_bullets_in_screen:
-        last_entity = list(components)[-1][0]
-        to_delete.add(last_entity)
+    sorted_components = sorted(components, key=lambda comp: comp[0], reverse=True)
+
+    while len(components) - len(to_delete) > max_bullets_in_screen:
+        newest_entity = sorted_components.pop(0)[0]
+        to_delete.add(newest_entity)
 
     for entity in to_delete:
         world.delete_entity(entity)

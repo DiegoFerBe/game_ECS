@@ -13,7 +13,8 @@ def system_boundary_player(world: esper.World, screen: pygame.Surface):
     components = world.get_components(CTransform, CSurface, CTagPlayer)
 
     for entity, (c_t, c_s, _) in components:
-        sprite_rect = c_s.surface.get_rect(topleft=c_t.position)
+        sprite_rect = c_s.area.copy()
+        sprite_rect.topleft = c_t.position
 
         if sprite_rect.left < 0:
             c_t.position.x = 0
