@@ -5,25 +5,19 @@ from src.ecs.components.c_player_state import CPlayerState, PlayerState
 from src.ecs.components.c_velocity import CVelocity
 
 
-def system_player_state(world:esper.World):
-    componentes = world.get_components(CVelocity,CAnimation,CPlayerState)
+def system_player_state(world: esper.World):
+    componentes = world.get_components(CVelocity, CAnimation, CPlayerState)
     for entity, (velocity, animation, player_state) in componentes:
-        if player_state.state == PlayerState.IDLE:
-            _do_idle_state(velocity, animation, player_state)
-        elif player_state.state == PlayerState.MOVE:
-            _do_move_state(velocity, animation, player_state)
+        _update_player_state(velocity, animation, player_state)
 
 
+def _update_player_state(velocity: CVelocity, animation: CAnimation, player_state: CPlayerState):
+    _set_animation(animation, 0 if player_state.state == PlayerState.MOVE else 1)
+    new_state = PlayerState.MOVE if velocity.velocity.magnitude_squared() > 0 else PlayerState.IDLE
 
-def _do_idle_state(velocity:CVelocity, animation:CAnimation, player_state:CPlayerState):
-    _set_animation(animation,1)
-    if velocity.velocity.magnitude_squared() > 0:
-        player_state.state = PlayerState.MOVE
-
-def _do_move_state(velocity:CVelocity, animation:CAnimation, player_state:CPlayerState):
-    _set_animation(animation,0)
-    if velocity.velocity.magnitude_squared() <= 0:
-        player_state.state = PlayerState.IDLE
+    if player_state.state != new_state:
+        player_state.state = new_state
+        _set_animation(animation, 0 if new_state == PlayerState.MOVE else 1)
 
 def _set_animation(animation:CAnimation, index_animation:int):
     if animation.current_animation != index_animation:
