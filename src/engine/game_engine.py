@@ -19,6 +19,7 @@ from src.ecs.systems.s_debug import system_debug
 from src.ecs.systems.s_enemy_spawner import system_enemy_spawner
 from src.ecs.systems.s_input_player import system_input_player
 from src.ecs.systems.s_movement import system_movement
+from src.ecs.systems.s_player_state import system_player_state
 from src.ecs.systems.s_rendering import system_rendering
 from src.ecs.systems.s_screen_bounce import system_screen_bounce
 from src.utils.json_loader import load_json
@@ -90,6 +91,7 @@ class GameEngine:
 
     def _update(self):
         system_movement(self.world,self.delta_time)
+        system_player_state(self.world)
         system_screen_bounce(self.world,self.screen)
         system_boundary_player(self.world,self.screen)
         system_enemy_spawner(self.world,self.delta_time, self.enemies)

@@ -4,6 +4,7 @@ import esper
 import pygame
 
 from src.ecs.components.c_animation import CAnimation
+from src.ecs.components.c_player_state import CPlayerState
 from src.ecs.components.c_surface import CSurface
 from src.ecs.components.c_transform import CTransform
 from src.ecs.components.c_velocity import CVelocity
@@ -68,6 +69,8 @@ def create_player_rectangle(world:esper.World,cfg_player:dict,position:dict) -> 
                         CAnimation(cfg_player['animations']))
     
     world.add_component(player_entity,CTagPlayer())
+    world.add_component(player_entity,
+                        CPlayerState())
     return player_entity
 
 def create_bullet_rectangle(world:esper.World,cfg_bullet:dict,position:pygame.Vector2,positionScope: pygame.Vector2) -> int:
