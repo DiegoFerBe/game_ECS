@@ -4,12 +4,14 @@ import esper
 import pygame
 
 from src.ecs.components.c_animation import CAnimation
+from src.ecs.components.c_hunter_state import CHunterState
 from src.ecs.components.c_player_state import CPlayerState
 from src.ecs.components.c_surface import CSurface
 from src.ecs.components.c_transform import CTransform
 from src.ecs.components.c_velocity import CVelocity
 from src.ecs.components.tags.c_tag_bullet import CTagBullet
-from src.ecs.components.tags.c_tag_enemy import CTagEnemy
+from src.ecs.components.tags.c_tag_enemy import CEnemyType, CTagEnemy
+from src.ecs.components.tags.c_tag_explotion import CTagExplotion
 from src.ecs.components.tags.c_tag_player import CTagPlayer
 
 def create_rectangle(world:esper.World,size:pygame.Vector2,color:pygame.Color,position:pygame.Vector2,velocity:pygame.Vector2) -> int:
@@ -55,15 +57,17 @@ def _create_standard_enemy(world: esper.World, cfg_enemy: dict, position: pygame
         texture=enemy_surface,
     )
     world.add_component(enemy_entity, CTagEnemy())
+    return enemy_entity
 
 
 def _create_animated_enemy(world: esper.World, cfg_enemy: dict, position: pygame.Vector2) -> None:
     enemy_sprite = pygame.image.load(cfg_enemy['image']).convert_alpha()
 
-    sprite_rect = enemy_sprite.get_rect()
-    sprite_rect.width = sprite_rect.width / cfg_enemy['animations']['number_frames']
-
+    size = enemy_sprite.get_rect()
+    size.width = size.width / cfg_enemy['animations']['number_frames']
+    
     velocity = pygame.Vector2(0, 0)
+    #position = pygame.Vector2(position.x - size.width / 2, position.y - size.height / 2)
 
     enemy_entity: int = create_sprite(
         world=world,
@@ -74,7 +78,9 @@ def _create_animated_enemy(world: esper.World, cfg_enemy: dict, position: pygame
 
     # Agregar componentes de animación y etiqueta de enemigo
     world.add_component(enemy_entity, CAnimation(cfg_enemy['animations']))
-    world.add_component(enemy_entity, CTagEnemy())
+    world.add_component(enemy_entity, CHunterState())   
+    world.add_component(enemy_entity, CTagEnemy(type=CEnemyType.HUNTER))
+    return enemy_entity
     
 def create_player_rectangle(world:esper.World,cfg_player:dict,position:dict) -> int:
     
@@ -125,3 +131,24 @@ def create_bullet_rectangle(world:esper.World,cfg_bullet:dict,position:pygame.Ve
     world.add_component(bullet_entity, CTagBullet())
 
     return bullet_entity
+
+def create_explotion(world:esper.World,cfg_explotion:dict,position:pygame.Vector2) -> int:
+    
+    explotion_sprite = pygame.image.load(cfg_explotion['image']).convert_alpha()
+    size = explotion_sprite.get_rect()
+    size.width = size.width / cfg_explotion['animations']['number_frames']
+    velocity = pygame.Vector2(0,0)
+    position = pygame.Vector2(position.x - size.width / 2, position.y - size.height / 2)
+    explotion_entity:int = create_sprite(
+                world=world,
+                position=position,
+                velocity=velocity,
+                texture=explotion_sprite,
+            )
+    
+    world.add_component(explotion_entity,
+                        CAnimation(cfg_explotion['animations']))
+    world.add_component(explotion_entity,
+                        CTagExplotion())
+    
+    return explotion_entity

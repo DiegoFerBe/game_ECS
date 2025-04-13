@@ -17,6 +17,7 @@ from src.ecs.systems.s_bullet_damage import system_bullet_damage_enemies
 from src.ecs.systems.s_collision_player_enemy import system_collision_player_enemy
 from src.ecs.systems.s_debug import system_debug
 from src.ecs.systems.s_enemy_spawner import system_enemy_spawner
+from src.ecs.systems.s_hunter_state import system_hunter_state
 from src.ecs.systems.s_input_player import system_input_player
 from src.ecs.systems.s_movement import system_movement
 from src.ecs.systems.s_player_state import system_player_state
@@ -91,6 +92,7 @@ class GameEngine:
 
     def _update(self):
         system_movement(self.world,self.delta_time)
+        system_hunter_state(self.world,self._player_entity,self.enemies["Hunter"],self.delta_time)
         system_player_state(self.world)
         system_screen_bounce(self.world,self.screen)
         system_boundary_player(self.world,self.screen)
@@ -107,7 +109,7 @@ class GameEngine:
         system_rendering(self.world,self.screen)
 
         # custom debug system
-        #system_debug(self.world,self.screen)
+        system_debug(self.world,self.screen)
 
         pygame.display.flip()
 
