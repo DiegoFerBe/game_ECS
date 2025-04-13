@@ -107,7 +107,7 @@ class GameEngine:
         system_rendering(self.world,self.screen)
 
         # custom debug system
-        system_debug(self.world,self.screen)
+        #system_debug(self.world,self.screen)
 
         pygame.display.flip()
 
@@ -144,8 +144,8 @@ class GameEngine:
             if c_input.phase == CommandPhase.START:
                 player_surface = self.world.component_for_entity(self._player_entity, CSurface)
                 player_center = self._player_c_transform.position + pygame.Vector2(
-                    player_surface.surface.get_width() / 2,
-                    player_surface.surface.get_height() / 2
+                    player_surface.area.width / 2,
+                    player_surface.area.height / 2
                 )
                 create_bullet_rectangle(self.world, self.bullet_config, position=player_center, positionScope=mouse_pos)
             

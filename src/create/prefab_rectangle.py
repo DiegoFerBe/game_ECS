@@ -34,22 +34,47 @@ def create_sprite(world:esper.World,position:pygame.Vector2,velocity:pygame.Vect
     
 def create_enemy_rectangle(world:esper.World,cfg_enemy:dict,position:pygame.Vector2) -> None:
     
+    if "animations" in cfg_enemy:
+        _create_animated_enemy(world, cfg_enemy, position)
+    else:
+        _create_standard_enemy(world, cfg_enemy, position)
+
+def _create_standard_enemy(world: esper.World, cfg_enemy: dict, position: pygame.Vector2) -> None:
     enemy_surface = pygame.image.load(cfg_enemy['image']).convert_alpha()
 
     angle = random.uniform(0, 360)
     angle_rad = math.radians(angle)
-    velocity_min = pygame.Vector2(100,100)
-    velocity_min:float = cfg_enemy['velocity_min']
-    velocity_max:float = cfg_enemy['velocity_max']
+    velocity_min = cfg_enemy['velocity_min']
+    velocity_max = cfg_enemy['velocity_max']
     velocity = random.uniform(velocity_min, velocity_max)
-    enemy_entity:int = create_sprite(
-                world=world,
-                position=position,
-                velocity=pygame.Vector2(velocity * math.cos(angle_rad), velocity * math.sin(angle_rad)),
-                texture=enemy_surface,
-            )
-    world.add_component(enemy_entity,CTagEnemy())
-    return enemy_entity
+
+    enemy_entity: int = create_sprite(
+        world=world,
+        position=position,
+        velocity=pygame.Vector2(velocity * math.cos(angle_rad), velocity * math.sin(angle_rad)),
+        texture=enemy_surface,
+    )
+    world.add_component(enemy_entity, CTagEnemy())
+
+
+def _create_animated_enemy(world: esper.World, cfg_enemy: dict, position: pygame.Vector2) -> None:
+    enemy_sprite = pygame.image.load(cfg_enemy['image']).convert_alpha()
+
+    sprite_rect = enemy_sprite.get_rect()
+    sprite_rect.width = sprite_rect.width / cfg_enemy['animations']['number_frames']
+
+    velocity = pygame.Vector2(0, 0)
+
+    enemy_entity: int = create_sprite(
+        world=world,
+        position=position,
+        velocity=velocity,
+        texture=enemy_sprite,
+    )
+
+    # Agregar componentes de animación y etiqueta de enemigo
+    world.add_component(enemy_entity, CAnimation(cfg_enemy['animations']))
+    world.add_component(enemy_entity, CTagEnemy())
     
 def create_player_rectangle(world:esper.World,cfg_player:dict,position:dict) -> int:
     
@@ -76,17 +101,20 @@ def create_player_rectangle(world:esper.World,cfg_player:dict,position:dict) -> 
 def create_bullet_rectangle(world:esper.World,cfg_bullet:dict,position:pygame.Vector2,positionScope: pygame.Vector2) -> int:
     
     bullet_sprite = pygame.image.load(cfg_bullet['image']).convert_alpha()
+    size = bullet_sprite.get_rect()
 
     direction = (positionScope - position)
-    if direction.length_squared() > 0:  # Evita división por 0
+    if direction.length_squared() > 0: 
         direction = direction.normalize()
     else:
-        direction = pygame.Vector2(1, 0)  # Dirección por defecto si son iguales
+        direction = pygame.Vector2(1, 0)
 
     speed = cfg_bullet["velocity"]
     velocity = direction * speed
 
-    # Crear la bala
+    position.x -= size.width / 2
+    position.y -= size.height / 2
+
     bullet_entity: int = create_sprite(
         world=world,
         position=position,
