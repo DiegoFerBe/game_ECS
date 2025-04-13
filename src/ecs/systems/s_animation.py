@@ -18,7 +18,7 @@ def system_animation(world: esper.World, delta_time: float) -> None:
 
             c_animation.current_frame += 1
 
-            if c_animation.current_frame >= c_animation.animations_list[c_animation.current_animation].end:
+            if c_animation.current_frame > c_animation.animations_list[c_animation.current_animation].end:
                 c_animation.current_frame = c_animation.animations_list[c_animation.current_animation].start
 
             sprite_sheet = c_surface.surface.get_rect()

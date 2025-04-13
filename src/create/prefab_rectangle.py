@@ -138,7 +138,7 @@ def create_explotion(world:esper.World,cfg_explotion:dict,position:pygame.Vector
     size = explotion_sprite.get_rect()
     size.width = size.width / cfg_explotion['animations']['number_frames']
     velocity = pygame.Vector2(0,0)
-    position = pygame.Vector2(position.x - size.width / 2, position.y - size.height / 2)
+    
     explotion_entity:int = create_sprite(
                 world=world,
                 position=position,

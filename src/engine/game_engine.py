@@ -17,6 +17,7 @@ from src.ecs.systems.s_bullet_damage import system_bullet_damage_enemies
 from src.ecs.systems.s_collision_player_enemy import system_collision_player_enemy
 from src.ecs.systems.s_debug import system_debug
 from src.ecs.systems.s_enemy_spawner import system_enemy_spawner
+from src.ecs.systems.s_explotion import system_explotion
 from src.ecs.systems.s_hunter_state import system_hunter_state
 from src.ecs.systems.s_input_player import system_input_player
 from src.ecs.systems.s_movement import system_movement
@@ -45,6 +46,7 @@ class GameEngine:
         self.window_config = load_json("assets/cfg/window.json")
         self.player_config = load_json("assets/cfg/player.json")
         self.bullet_config = load_json("assets/cfg/bullet.json")
+        self.explotion_config = load_json("assets/cfg/explosion.json")
 
         
         self.fps = self.window_config["framerate"]
@@ -97,11 +99,12 @@ class GameEngine:
         system_screen_bounce(self.world,self.screen)
         system_boundary_player(self.world,self.screen)
         system_enemy_spawner(self.world,self.delta_time, self.enemies)
-        system_collision_player_enemy(self.world,self._player_entity, self.level_config)
+        system_collision_player_enemy(self.world,self._player_entity, self.level_config,self.explotion_config)
         system_bullet(self.world,self.screen, self.level_config["player_spawn"]["max_bullets"])
-        system_bullet_damage_enemies(self.world)
+        system_bullet_damage_enemies(self.world,self.explotion_config)
 
         system_animation(self.world,self.delta_time)
+        system_explotion(self.world)
         self.world._clear_dead_entities()
 
     def _draw(self):
@@ -109,7 +112,7 @@ class GameEngine:
         system_rendering(self.world,self.screen)
 
         # custom debug system
-        system_debug(self.world,self.screen)
+        #system_debug(self.world,self.screen)
 
         pygame.display.flip()
 
