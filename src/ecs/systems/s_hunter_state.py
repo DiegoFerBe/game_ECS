@@ -7,6 +7,7 @@ from src.ecs.components.c_surface import CSurface
 from src.ecs.components.c_transform import CTransform
 from src.ecs.components.c_velocity import CVelocity
 from src.ecs.components.tags.c_tag_enemy import CTagEnemy
+from src.ecs.systems.s_animation import set_animation
 
 
 def system_hunter_state(world: esper.World, player_entity: int, cfg_hunter: dict, delta_time: float) -> None:
@@ -52,9 +53,9 @@ def _update_hunter_state(velocity: CVelocity, transform: CTransform, surface: CS
         velocity.velocity = distance_to_player.normalize() * velocity_chase * delta_time
         transform.position += velocity.velocity
     else:
-        print(f"distance_to_spawn_length: {distance_to_spawn_length}")
         if distance_to_spawn_length <= 1.0:
             velocity.velocity = pygame.Vector2(0, 0)
+            transform.position = transform.spawn_position.copy()
             return
         velocity.velocity = distance_to_spawn.normalize() * velocity_return * delta_time
         transform.position += velocity.velocity
@@ -63,19 +64,13 @@ def _update_hunter_state(velocity: CVelocity, transform: CTransform, surface: CS
 
 
 def _update_hunter_animation(velocity:CVelocity,animation: CAnimation, state: CHunterState) -> None:
-    _set_animation(animation, 0 if state.state == HunterState.MOVE else 1)
+    set_animation(animation, 0 if state.state == HunterState.MOVE else 1)
     new_state = HunterState.MOVE if velocity.velocity.magnitude_squared() > 0 else HunterState.IDLE
 
     if state.state != new_state:
         state.state = new_state
-        _set_animation(animation, 0 if new_state == HunterState.MOVE else 1)
+        set_animation(animation, 0 if new_state == HunterState.MOVE else 1)
 
-
-def _set_animation(animation:CAnimation, index_animation:int):
-    if animation.current_animation != index_animation:
-        animation.current_animation = index_animation
-        animation.current_animation_time = 0.0
-        animation.current_frame = animation.animations_list[animation.current_animation].start
 
 def _truncate_vector(vector: pygame.Vector2, decimals: int) -> pygame.Vector2:
     return pygame.Vector2(round(vector.x, decimals), round(vector.y, decimals))

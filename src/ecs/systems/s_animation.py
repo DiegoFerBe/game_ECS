@@ -24,4 +24,10 @@ def system_animation(world: esper.World, delta_time: float) -> None:
             sprite_sheet = c_surface.surface.get_rect()
             c_surface.area.w = sprite_sheet.width // c_animation.number_frames
             c_surface.area.x = c_surface.area.w * c_animation.current_frame
+
+def set_animation(animation:CAnimation, index_animation:int):
+    if animation.current_animation != index_animation:
+        animation.current_animation = index_animation
+        animation.current_animation_time = 0.0
+        animation.current_frame = animation.animations_list[animation.current_animation].start
             
