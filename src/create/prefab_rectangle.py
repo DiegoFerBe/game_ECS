@@ -13,6 +13,7 @@ from src.ecs.components.tags.c_tag_bullet import CTagBullet
 from src.ecs.components.tags.c_tag_enemy import CEnemyType, CTagEnemy
 from src.ecs.components.tags.c_tag_explotion import CTagExplotion
 from src.ecs.components.tags.c_tag_player import CTagPlayer
+from src.engine.service_locator import ServiceLocator
 
 def create_rectangle(world:esper.World,size:pygame.Vector2,color:pygame.Color,position:pygame.Vector2,velocity:pygame.Vector2) -> int:
     rectangle_entity = world.create_entity()
@@ -42,7 +43,7 @@ def create_enemy_rectangle(world:esper.World,cfg_enemy:dict,position:pygame.Vect
         _create_standard_enemy(world, cfg_enemy, position)
 
 def _create_standard_enemy(world: esper.World, cfg_enemy: dict, position: pygame.Vector2) -> None:
-    enemy_surface = pygame.image.load(cfg_enemy['image']).convert_alpha()
+    enemy_surface = ServiceLocator.images_service.get(cfg_enemy['image'])
 
     angle = random.uniform(0, 360)
     angle_rad = math.radians(angle)
@@ -61,7 +62,7 @@ def _create_standard_enemy(world: esper.World, cfg_enemy: dict, position: pygame
 
 
 def _create_animated_enemy(world: esper.World, cfg_enemy: dict, position: pygame.Vector2) -> None:
-    enemy_sprite = pygame.image.load(cfg_enemy['image']).convert_alpha()
+    enemy_sprite = ServiceLocator.images_service.get(cfg_enemy['image'])
 
     size = enemy_sprite.get_rect()
     size.width = size.width / cfg_enemy['animations']['number_frames']
@@ -85,6 +86,7 @@ def _create_animated_enemy(world: esper.World, cfg_enemy: dict, position: pygame
 def create_player_rectangle(world:esper.World,cfg_player:dict,position:dict) -> int:
     
     player_sprite = pygame.image.load(cfg_player['image']).convert_alpha()
+    player_sprite = ServiceLocator.images_service.get(cfg_player['image'])
     size = player_sprite.get_rect()
     size.width = size.width / cfg_player['animations']['number_frames']
     velocity = pygame.Vector2(0,0)
@@ -106,7 +108,7 @@ def create_player_rectangle(world:esper.World,cfg_player:dict,position:dict) -> 
 
 def create_bullet_rectangle(world:esper.World,cfg_bullet:dict,position:pygame.Vector2,positionScope: pygame.Vector2) -> int:
     
-    bullet_sprite = pygame.image.load(cfg_bullet['image']).convert_alpha()
+    bullet_sprite = ServiceLocator.images_service.get(cfg_bullet['image'])
     size = bullet_sprite.get_rect()
 
     direction = (positionScope - position)
@@ -134,7 +136,7 @@ def create_bullet_rectangle(world:esper.World,cfg_bullet:dict,position:pygame.Ve
 
 def create_explotion(world:esper.World,cfg_explotion:dict,position:pygame.Vector2) -> int:
     
-    explotion_sprite = pygame.image.load(cfg_explotion['image']).convert_alpha()
+    explotion_sprite = ServiceLocator.images_service.get(cfg_explotion['image'])
     size = explotion_sprite.get_rect()
     size.width = size.width / cfg_explotion['animations']['number_frames']
     velocity = pygame.Vector2(0,0)

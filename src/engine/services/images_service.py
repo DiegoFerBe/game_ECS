@@ -1,9 +1,10 @@
 import pygame
 
-
 class ImagesService:
     def __init__(self):
-        pass
+       self.images = {}
 
     def get(self, path: str) -> pygame.Surface:
-        pass
+        if path not in self.images:
+            self.images[path] = pygame.image.load(path).convert_alpha()
+        return self.images[path]
