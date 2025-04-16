@@ -152,5 +152,5 @@ def create_explotion(world:esper.World,cfg_explotion:dict,position:pygame.Vector
                         CAnimation(cfg_explotion['animations']))
     world.add_component(explotion_entity,
                         CTagExplotion())
-    
+    ServiceLocator.sounds_service.play(cfg_explotion['sound'])
     return explotion_entity
