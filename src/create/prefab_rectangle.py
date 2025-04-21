@@ -58,6 +58,7 @@ def _create_standard_enemy(world: esper.World, cfg_enemy: dict, position: pygame
         texture=enemy_surface,
     )
     world.add_component(enemy_entity, CTagEnemy())
+    ServiceLocator.sounds_service.play(cfg_enemy['sound'])
     return enemy_entity
 
 
@@ -131,6 +132,7 @@ def create_bullet_rectangle(world:esper.World,cfg_bullet:dict,position:pygame.Ve
     )
 
     world.add_component(bullet_entity, CTagBullet())
+    ServiceLocator.sounds_service.play(cfg_bullet['sound'])
 
     return bullet_entity
 
