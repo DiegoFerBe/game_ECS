@@ -55,7 +55,7 @@ class GameEngine:
         pygame.display.set_caption(self.window_config["title"])
 
         
-
+        self.is_paused = False
 
     def run(self) -> None:
         self._create()
@@ -93,17 +93,20 @@ class GameEngine:
                 self.is_running = False
 
     def _update(self):
-        system_movement(self.world,self.delta_time)
+
+        if not self.is_paused:
+            system_movement(self.world,self.delta_time)
+            system_collision_player_enemy(self.world,self._player_entity, self.level_config,self.explotion_config)
+
         system_hunter_state(self.world,self._player_entity,self.enemies["Hunter"],self.delta_time)
         system_player_state(self.world)
         system_screen_bounce(self.world,self.screen)
         system_boundary_player(self.world,self.screen)
-        system_enemy_spawner(self.world,self.delta_time, self.enemies)
-        system_collision_player_enemy(self.world,self._player_entity, self.level_config,self.explotion_config)
+        if not self.is_paused: system_enemy_spawner(self.world,self.delta_time, self.enemies)
         system_bullet(self.world,self.screen, self.level_config["player_spawn"]["max_bullets"])
         system_bullet_damage_enemies(self.world,self.explotion_config)
 
-        system_animation(self.world,self.delta_time)
+        if not self.is_paused: system_animation(self.world,self.delta_time)
         system_explotion(self.world)
         self.world._clear_dead_entities()
 
@@ -153,5 +156,9 @@ class GameEngine:
                     player_surface.area.height / 2
                 )
                 create_bullet_rectangle(self.world, self.bullet_config, position=player_center, positionScope=mouse_pos)
-            
+
+        if c_input.name == "PAUSE GAME":
+            if c_input.phase == CommandPhase.START:
+                self.is_paused = not self.is_paused
+
             
