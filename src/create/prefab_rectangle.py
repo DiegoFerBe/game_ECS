@@ -6,13 +6,16 @@ import pygame
 from src.ecs.components.c_animation import CAnimation
 from src.ecs.components.c_hunter_state import CHunterState
 from src.ecs.components.c_player_state import CPlayerState
+from src.ecs.components.c_state_ui import CStateUI
 from src.ecs.components.c_surface import CSurface
+from src.ecs.components.c_text import CText
 from src.ecs.components.c_transform import CTransform
 from src.ecs.components.c_velocity import CVelocity
 from src.ecs.components.tags.c_tag_bullet import CTagBullet
 from src.ecs.components.tags.c_tag_enemy import CEnemyType, CTagEnemy
 from src.ecs.components.tags.c_tag_explotion import CTagExplotion
 from src.ecs.components.tags.c_tag_player import CTagPlayer
+from src.ecs.components.tags.c_tag_ui import CTagUI, UIType
 from src.engine.service_locator import ServiceLocator
 
 def create_rectangle(world:esper.World,size:pygame.Vector2,color:pygame.Color,position:pygame.Vector2,velocity:pygame.Vector2) -> int:
@@ -156,3 +159,19 @@ def create_explotion(world:esper.World,cfg_explotion:dict,position:pygame.Vector
                         CTagExplotion())
     ServiceLocator.sounds_service.play(cfg_explotion['sound'])
     return explotion_entity
+
+def create_text(world:esper.World,text:str,position:pygame.Vector2,color:pygame.color.Color,type:UIType) -> int:
+    font = ServiceLocator.fonts_service.get_font("assets/fnt/PressStart2P.ttf")
+
+    text_entity = world.create_entity()
+    # world.add_component(text_entity,
+    #                     CSurface.from_text(text, font, color))
+    world.add_component(text_entity, CText(text, color))
+
+    world.add_component(text_entity,
+                        CTransform(position=position))
+    world.add_component(text_entity,
+                        CStateUI())
+    world.add_component(text_entity,
+                        CTagUI(type=type))
+    return text_entity

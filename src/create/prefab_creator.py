@@ -18,5 +18,5 @@ def create_input_player(world: esper.World):
     world.add_component(input_up, CInputCommand(name="PLAYER UP",key=pygame.K_UP,))
     world.add_component(input_down, CInputCommand(name="PLAYER DOWN",key=pygame.K_DOWN,))
     world.add_component(input_shoot, CInputCommand(name="PLAYER FIRE",key=1))
-    world.add_component(input_pause, CInputCommand(name="PAUSE GAME",key=pygame.K_ESCAPE,))
+    world.add_component(input_pause, CInputCommand(name="PAUSE GAME",key=pygame.K_p,))
     

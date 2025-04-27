@@ -3,7 +3,7 @@ import pygame
 import esper
 
 from src.create.prefab_creator import create_input_player
-from src.create.prefab_rectangle import create_bullet_rectangle, create_player_rectangle
+from src.create.prefab_rectangle import create_bullet_rectangle, create_player_rectangle, create_text
 from src.create.prefab_spawner import create_spawner
 from src.ecs.components.c_input_command import CInputCommand, CommandPhase
 from src.ecs.components.c_surface import CSurface
@@ -24,7 +24,9 @@ from src.ecs.systems.s_movement import system_movement
 from src.ecs.systems.s_player_state import system_player_state
 from src.ecs.systems.s_rendering import system_rendering
 from src.ecs.systems.s_screen_bounce import system_screen_bounce
+from src.ecs.systems.s_ui import system_ui
 from src.utils.json_loader import load_json
+from src.utils.text_loader import load_text
 
 class GameEngine:
     def __init__(self) -> None:
@@ -47,6 +49,7 @@ class GameEngine:
         self.player_config = load_json("assets/cfg/player.json")
         self.bullet_config = load_json("assets/cfg/bullet.json")
         self.explotion_config = load_json("assets/cfg/explosion.json")
+        self.text_config = load_json("assets/cfg/interface.json")
 
         
         self.fps = self.window_config["framerate"]
@@ -69,6 +72,9 @@ class GameEngine:
 
     def _create(self):
         
+        #Test text
+        load_text(self.world,self.text_config)
+
         #Enemy spawner
         create_spawner(self.world, self.level_config["enemy_spawn_events"])
 
@@ -94,6 +100,7 @@ class GameEngine:
 
     def _update(self):
 
+        system_ui(self.world, self.is_paused)
         if not self.is_paused:
             system_movement(self.world,self.delta_time)
             system_collision_player_enemy(self.world,self._player_entity, self.level_config,self.explotion_config)
