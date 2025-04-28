@@ -10,11 +10,12 @@ from src.ecs.components.c_surface import CSurface
 from src.ecs.components.c_transform import CTransform
 from src.ecs.components.c_velocity import CVelocity
 from src.ecs.components.tags.c_tag_bullet import CTagBullet
+from src.ecs.components.tags.c_tag_ui import UIType
 from src.ecs.systems.s_animation import system_animation
 from src.ecs.systems.s_boundary_player import system_boundary_player
 from src.ecs.systems.s_bullet import system_bullet
 from src.ecs.systems.s_bullet_damage import system_bullet_damage_enemies
-from src.ecs.systems.s_collision_player_enemy import system_collision_player_enemy
+from src.ecs.systems.s_collision_player_enemy import system_camouflage, system_collision_player_enemy
 from src.ecs.systems.s_debug import system_debug
 from src.ecs.systems.s_enemy_spawner import system_enemy_spawner
 from src.ecs.systems.s_explotion import system_explotion
@@ -57,8 +58,11 @@ class GameEngine:
         self.screen = pygame.display.set_mode((self.window_config["size"]["w"], self.window_config["size"]["h"]),pygame.SCALED)
         pygame.display.set_caption(self.window_config["title"])
 
-        
         self.is_paused = False
+        self.is_camouflage = False
+        self.camouflage_duration = 2.0  # Duración del camuflaje en segundos
+        self.is_reloading_camouflage = False  # Bandera para recarga
+        self.camouflage_reload_timer = 0.0
 
     def run(self) -> None:
         self._create()
@@ -85,7 +89,12 @@ class GameEngine:
         self._player_c_velocity = self.world.component_for_entity(self._player_entity, CVelocity)
         self._player_c_transform = self.world.component_for_entity(self._player_entity, CTransform)
 
-        
+        ## Camouflage text
+        self.camouflage_text = create_text(world=self.world,
+                                           text=f"Time camouflage: {self.camouflage_duration:.1f}",
+                                           position=pygame.Vector2(30,320),
+                                           color=pygame.color.Color(255, 255, 255),
+                                           type=UIType.GAMEPLAY)
 
 
     def _calculate_time(self):
@@ -103,7 +112,11 @@ class GameEngine:
         system_ui(self.world, self.is_paused)
         if not self.is_paused:
             system_movement(self.world,self.delta_time)
-            system_collision_player_enemy(self.world,self._player_entity, self.level_config,self.explotion_config)
+            if not self.is_camouflage: system_collision_player_enemy(self.world,self._player_entity, self.level_config,self.explotion_config)
+
+        
+        system_camouflage(self,self.world,self.camouflage_text)
+
 
         system_hunter_state(self.world,self._player_entity,self.enemies["Hunter"],self.delta_time)
         system_player_state(self.world)
@@ -163,6 +176,14 @@ class GameEngine:
                     player_surface.area.height / 2
                 )
                 create_bullet_rectangle(self.world, self.bullet_config, position=player_center, positionScope=mouse_pos)
+
+        if c_input.name == "CAMOUFLAGE":
+            if c_input.phase == CommandPhase.START:
+                if not self.is_camouflage and not self.is_reloading_camouflage:
+                    self.is_camouflage = True
+                    self.camouflage_duration = 2.0  # Reiniciar la duración del camuflaje
+                    print("Camouflage activated")
+
 
         if c_input.name == "PAUSE GAME":
             if c_input.phase == CommandPhase.START:

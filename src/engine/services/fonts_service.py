@@ -8,5 +8,5 @@ class FontsService:
 
     def get_font(self, font_path:str) -> pygame.font.Font: 
         if font_path not in self.fonts:
-            self.fonts[font_path] = pygame.font.Font(font_path, 12)
+            self.fonts[font_path] = pygame.font.Font(font_path, 8)
         return self.fonts[font_path]

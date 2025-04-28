@@ -1,4 +1,3 @@
-
 import esper
 import pygame
 from src.ecs.components.c_animation import CAnimation
@@ -33,7 +32,7 @@ def system_hunter_state(world: esper.World, player_entity: int, cfg_hunter: dict
 
 
 def _update_hunter_state(velocity: CVelocity, transform: CTransform, surface: CSurface, 
-                         player_center: pygame.Vector2, cfg_hunter: dict, delta_time: float,hunterState:CHunterState) -> None:
+                         player_center: pygame.Vector2, cfg_hunter: dict, delta_time: float, hunterState: CHunterState) -> None:
     
     position_enemy = transform.position + pygame.Vector2(
         surface.area.width / 2,
@@ -43,17 +42,20 @@ def _update_hunter_state(velocity: CVelocity, transform: CTransform, surface: CS
         surface.area.width / 2,
         surface.area.height / 2
     )
-    distance_to_player = _truncate_vector(player_center - position_enemy,0)
-    distance_to_spawn = _truncate_vector(spawn_position - position_enemy,0)
+    distance_to_player = _truncate_vector(player_center - position_enemy, 0)
+    distance_to_spawn = _truncate_vector(spawn_position - position_enemy, 0)
 
     distance_to_player_length = distance_to_player.length()
-    distance_to_spawn_length = round(distance_to_spawn.length(),0)
+    distance_to_spawn_length = round(distance_to_spawn.length(), 0)
 
     velocity_chase = cfg_hunter["velocity_chase"]
     velocity_return = cfg_hunter["velocity_return"]
 
     if cfg_hunter["distance_start_chase"] >= distance_to_player_length < cfg_hunter["distance_start_return"]:
-        velocity.velocity = distance_to_player.normalize() * velocity_chase * delta_time
+        if distance_to_player_length > 0:
+            velocity.velocity = distance_to_player.normalize() * velocity_chase * delta_time
+        else:
+            velocity.velocity = pygame.Vector2(0, 0)
         transform.position += velocity.velocity
         hunterState.state = HunterState.MOVE
     else:
@@ -62,7 +64,10 @@ def _update_hunter_state(velocity: CVelocity, transform: CTransform, surface: CS
             transform.position = transform.spawn_position.copy()
             hunterState.state = HunterState.IDLE
             return
-        velocity.velocity = distance_to_spawn.normalize() * velocity_return * delta_time
+        if distance_to_spawn_length > 0:
+            velocity.velocity = distance_to_spawn.normalize() * velocity_return * delta_time
+        else:
+            velocity.velocity = pygame.Vector2(0, 0) 
         transform.position += velocity.velocity
         hunterState.state = HunterState.RETURN
    

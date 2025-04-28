@@ -166,7 +166,7 @@ def create_text(world:esper.World,text:str,position:pygame.Vector2,color:pygame.
     text_entity = world.create_entity()
     # world.add_component(text_entity,
     #                     CSurface.from_text(text, font, color))
-    world.add_component(text_entity, CText(text, color))
+    world.add_component(text_entity, CText(text, color,font))
 
     world.add_component(text_entity,
                         CTransform(position=position))

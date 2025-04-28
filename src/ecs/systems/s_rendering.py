@@ -17,7 +17,6 @@ def system_rendering(world:esper.World,screen:pygame.Surface) -> None:
 
     components_text = world.get_components(CText, CTransform, CStateUI)
     for entity, (c_text, c_transform,c_state) in components_text:
-        font = ServiceLocator.fonts_service.get_font("assets/fnt/PressStart2P.ttf")
-        text_surface = font.render(c_text.text, True, c_text.color)
+        text_surface = c_text.font.render(c_text.text, True, c_text.color)
         if c_state.state:
             screen.blit(text_surface, c_transform.position)
