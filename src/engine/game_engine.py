@@ -1,3 +1,4 @@
+import asyncio
 from typing import Optional
 import pygame
 import esper
@@ -55,16 +56,16 @@ class GameEngine:
         
         self.fps = self.window_config["framerate"]
         # Create the main screen
-        self.screen = pygame.display.set_mode((self.window_config["size"]["w"], self.window_config["size"]["h"]),pygame.SCALED)
+        self.screen = pygame.display.set_mode((self.window_config["size"]["w"], self.window_config["size"]["h"]),0)
         pygame.display.set_caption(self.window_config["title"])
 
         self.is_paused = False
         self.is_camouflage = False
-        self.camouflage_duration = 2.0  # Duración del camuflaje en segundos
-        self.is_reloading_camouflage = False  # Bandera para recarga
+        self.camouflage_duration = 2.0
+        self.is_reloading_camouflage = False
         self.camouflage_reload_timer = 0.0
 
-    def run(self) -> None:
+    async def run(self) -> None:
         self._create()
         self.is_running = True
         while self.is_running:
@@ -72,6 +73,7 @@ class GameEngine:
             self._process_events()
             self._update()
             self._draw()
+            await asyncio.sleep(0)
         self._clean()
 
     def _create(self):
@@ -181,8 +183,7 @@ class GameEngine:
             if c_input.phase == CommandPhase.START:
                 if not self.is_camouflage and not self.is_reloading_camouflage:
                     self.is_camouflage = True
-                    self.camouflage_duration = 2.0  # Reiniciar la duración del camuflaje
-                    print("Camouflage activated")
+                    self.camouflage_duration = 2.0
 
 
         if c_input.name == "PAUSE GAME":

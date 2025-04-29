@@ -1,2 +1,4 @@
-# PLANTILLA PROYECTO - SEMANA 01
-Esta plantilla contiene la estructura básica para comenzar los video-series de la semana 1 de "introeucción al desarrollo de videojuegos con ECS"
+# Juego individual ECS
+Proyecto desplegado en itch.io: https://zenseii.itch.io/spacecowboy
+
+
